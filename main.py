@@ -19,10 +19,17 @@ helper = json.loads(open('./jsons/edithw.json', 'r', encoding='utf-8').read())
 
 # отправление рандомного мема
 def send_memes():
-    num = random.randint(1, 79)
+    count = 79
+    num = random.randint(1, count)
     photo = open("memes_photo/memes" + str(num) + ".jpg", 'rb')
-    #bot.send_photo(message.chat.id, photo)
     return photo
+
+#отправление песни для учебы
+def send_playlist():
+    count = 2
+    num = random.randint(1, count)
+    playlist = open("songs/playlist" + str(num) + ".mp3", 'rb')
+    return playlist
 
 # генерация рандомного имени для фото
 def randomword(length):
@@ -365,7 +372,14 @@ def func(message):
 
 
     # кнопка музыка
-    # elif (user_state[str(message.chat.id)] == 'music' and mes_text == "музыка"):
+    elif (user_state[str(message.chat.id)] == 'main menu' and mes_text == "музыка"):
+        playlist = send_playlist()
+        bot.send_photo(message.chat.id, playlist)
+
+    # кнопка мемы
+    elif (user_state[str(message.chat.id)] == 'main menu' and mes_text == "мемы"):
+        photo = send_memes()
+        bot.send_photo(message.chat.id, photo)
 
     # добавить дз
     elif (user_state[str(message.chat.id)] == 'redakt hw' and mes_text == "добавить дз"):
