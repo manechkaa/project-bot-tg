@@ -17,6 +17,13 @@ homework = json.loads(open('./jsons/homeworks.json', 'r', encoding='utf-8').read
 user_state = json.loads(open('./jsons/users_states.json', 'r', encoding='utf-8').read())
 helper = json.loads(open('./jsons/edithw.json', 'r', encoding='utf-8').read())
 
+# отправление рандомного мема
+def send_memes():
+    num = random.randint(1, 79)
+    photo = open("memes_photo/memes" + str(num) + ".jpg", 'rb')
+    #bot.send_photo(message.chat.id, photo)
+    return photo
+
 # генерация рандомного имени для фото
 def randomword(length):
     letters = string.ascii_lowercase
