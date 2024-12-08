@@ -25,11 +25,15 @@ def send_memes():
     return photo
 
 #отправление песни для учебы
-def send_playlist():
-    count = 2
-    num = random.randint(1, count)
-    playlist = open("songs/playlist" + str(num) + ".mp3", 'rb')
-    return playlist
+def send_playlist(message):
+    markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
+    count = 5
+    rnd = random.randint(1, count - 4)
+    for i in range(5):
+        num = rnd + i
+        playlist = open("songs/playlist" + str(num) + ".mp3", 'rb')
+        bot.send_audio(message.chat.id, playlist, reply_markup=markup)
+
 
 # генерация рандомного имени для фото
 def randomword(length):
@@ -373,13 +377,15 @@ def func(message):
 
     # кнопка музыка
     elif (user_state[str(message.chat.id)] == 'main menu' and mes_text == "музыка"):
-        playlist = send_playlist()
-        bot.send_photo(message.chat.id, playlist)
+        markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
+        bot.send_message(message.chat.id, text="🎧5 треков для учебы уже отправляются!", reply_markup=markup)
+        send_playlist(message)
 
     # кнопка мемы
     elif (user_state[str(message.chat.id)] == 'main menu' and mes_text == "мемы"):
+        markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
         photo = send_memes()
-        bot.send_photo(message.chat.id, photo)
+        bot.send_photo(message.chat.id, photo, reply_markup=markup)
 
     # добавить дз
     elif (user_state[str(message.chat.id)] == 'redakt hw' and mes_text == "добавить дз"):
