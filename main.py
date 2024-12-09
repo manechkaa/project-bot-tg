@@ -27,7 +27,7 @@ def send_memes():
 #отправление песни для учебы
 def send_playlist(message):
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
-    count = 5
+    count = 11
     rnd = random.randint(1, count - 4)
     for i in range(5):
         num = rnd + i
