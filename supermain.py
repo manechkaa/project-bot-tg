@@ -194,7 +194,7 @@ def func(message):
     # кнопка мемы
     elif user_state[str(message.chat.id)] == 'main menu' and mes_text == "мемы":
         markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
-        photo = other_functions.send_memes()
+        photo = other_functions.send_memes(bot, message)
         bot.send_photo(message.chat.id, photo, reply_markup=markup)
 
     # добавить дз
