@@ -1,16 +1,10 @@
 import telebot, string, random
 import json
 import os
-import sys
-import datetime
-import pytz
-import random
 import output_hw
 import mydate
 import other_functions
-import requests
 from telebot import types
-from datetime import date
 
 token = open('file_token.txt').read()
 bot = telebot.TeleBot(token)
