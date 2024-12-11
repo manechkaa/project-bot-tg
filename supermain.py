@@ -16,6 +16,8 @@ helper = json.loads(open('./jsons/edithw.json', 'r', encoding='utf-8').read())
 
 @bot.message_handler(commands=['start'])
 def start(message):
+    myid = str(message.from_user.id)
+    #print(myid)
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
     btn_start_1 = types.KeyboardButton("Домашнее задание📚")
     btn_start_admin_1 = types.KeyboardButton("✨Редактировать домашнее задание✨")
@@ -33,6 +35,7 @@ def start(message):
 
 @bot.message_handler(content_types=['text', 'photo'])
 def func(message):
+    myid = str(message.from_user.id)
     mes_text = "-1"
     if message.photo == None:
         mes_text = message.text
@@ -195,7 +198,7 @@ def func(message):
         bot.send_photo(message.chat.id, photo, reply_markup=markup)
 
     # добавить дз
-    elif (user_state[str(message.chat.id)] == 'redakt hw' and mes_text == "добавить дз"):
+    elif user_state[str(message.chat.id)] == 'redakt hw' and mes_text == "добавить дз":
         markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
         btn_back = types.KeyboardButton("Вернуться назад")
         markup.add(btn_back)
@@ -204,7 +207,7 @@ def func(message):
         user_state[str(message.chat.id)] = "add_hw"
 
     # считывание фото для дз
-    elif (helper["type"] == "add" and user_state[str(message.chat.id)] == "read_add_hw"):
+    elif helper["type"] == "add" and user_state[str(message.chat.id)] == "read_add_hw":
         markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
         fileID = message.photo[-1].file_id
         file_info = bot.get_file(fileID)
@@ -213,13 +216,12 @@ def func(message):
         src = './photos/' + name_of_new_file
         with open(src, 'wb') as new_file:
             new_file.write(downloaded_file)
-        if (not (helper["sub"] in homework[helper["day"]][helper["profile"]]["im"].keys())):
+        if not (helper["sub"] in homework[helper["day"]][helper["profile"]]["im"].keys()):
             homework[helper["day"]][helper["profile"]]["im"][helper["sub"]] = []
         homework[helper["day"]][helper["profile"]]["im"][helper["sub"]].append(name_of_new_file)
         helper["cnt"] = (helper["cnt"] - 1)
-        if (helper["cnt"] == 0):
+        if helper["cnt"] == 0:
             user_state[str(message.chat.id)] = 'redakt hw'
-            markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
             btn_hw_1 = types.KeyboardButton("Добавить дз")
             btn_hw_3 = types.KeyboardButton("Удалить дз")
             btn_hw_4 = types.KeyboardButton("Удалить все дз")
@@ -232,204 +234,207 @@ def func(message):
             helper["type"] = ""
 
     # вывод дз для добавления
-    elif (user_state[str(message.chat.id)] == "add_hw"):
+    elif user_state[str(message.chat.id)] == "add_hw":
         markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
         btn_back = types.KeyboardButton("Вернуться назад")
         markup.add(btn_back)
-        if (not mydate.is_good_date(mes_text)):
+        if not mydate.is_good_date(mes_text):
             bot.send_message(message.chat.id, text="Ты ввел дату не в том формате. Пожалуйста, повтори попытку.")
         else:
             output_hw.print_homework(bot, message, mes_text)
             helper["day"] = mes_text
             user_state[str(message.chat.id)] = "read_add_hw"
             bot.send_message(message.chat.id,
-                             text="Напиши запрос в формате: *предмет* *кому* с *фото* фото и само дз.\n*предмет* - предмет, записанный одним словом в именительном падеже.\n*кому* - подгруппе или всем.\n*фото* - с х фото, где х - кол-во фото дз на этот предмет (Если фото есть, то отправь его(их) следуюущим(-и) сообщением. Если есть только фото, то напиши текстом, что всё задание на фото.)",
+                             text="Напиши запрос в формате: *предмет* с *х* фото и само дз.\n*предмет* - предмет, записанный одним словом в именительном падеже.\nс х фото, где х - кол-во фото дз на этот предмет, 0<=x<=10 (Если фото есть, то отправь его(их) следующим(-и) сообщением. Если есть только фото, то напиши текстом, что все задание на фото.)",
                              reply_markup=markup)
     # считывание дз для добавления
     elif (user_state[str(message.chat.id)] == "read_add_hw"):
         markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
         btn_back = types.KeyboardButton("Вернуться назад")
-        sub = mes_text.split()[0]
-        profile = "both"
-        if (mes_text.split()[1][0:2] == "ин"): profile = "inf"
-        if (mes_text.split()[1][0:2] == "ма"): profile = "mat"
-        cnt = int(mes_text.split()[3])
-        type = "add"
-        hw = ""
-        for x in message.text.split()[5::]:
-            hw = hw + x + " "
-        if (not (helper["day"] in homework.keys())):
-            homework[helper["day"]] = {"both": {"texts": {}, "im": {}}, "inf": {"texts": {}, "im": {}},
-                                       "mat": {"texts": {}, "im": {}}}
+        check = list(mes_text.split())
+        if len(check) < 4 or check[2] != 'c' or not(check[3] in ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10']) or check[4] != 'фото':
+            bot.send_message(message.chat.id,
+                             text="Введен некорректный запрос. Напиши его в формате: *предмет* с *x* фото и само дз.\n*предмет* - предмет, записанный одним словом в именительном падеже.\nс х фото, где х - кол-во фото дз на этот предмет, 0<=x<=10 (Если фото есть, то отправь его(их) следуюущим(-и) сообщением. Если есть только фото, то напиши текстом, что всё задание на фото.)",
+                             reply_markup=markup)
         else:
-            if (len(homework[helper["day"]][profile]["texts"]) != 0 and sub in homework[helper["day"]][profile][
-                "texts"].keys()):
-                del homework[helper["day"]][profile]["texts"][sub]
-            if (len(homework[helper["day"]][profile]["im"]) != 0 and sub in homework[helper["day"]][profile][
-                "im"].keys()):
-                for x in homework[helper["day"]][profile]["im"][sub]:
-                    os.remove("./photos/" + x)
-                del homework[helper["day"]][profile]["im"][sub]
-        homework[helper["day"]][profile]["texts"][sub] = hw
-        if (cnt == 0):
-            user_state[str(message.chat.id)] = 'redakt hw'
-            markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
-            btn_hw_1 = types.KeyboardButton("Добавить дз")
-            btn_hw_3 = types.KeyboardButton("Удалить дз")
-            btn_hw_4 = types.KeyboardButton("Удалить все дз")
-            btn_hw_5 = types.KeyboardButton("Удалить дз на день")
-            markup.add(btn_hw_1, btn_hw_3)
-            markup.add(btn_hw_4, btn_hw_5)
-            btn_back = types.KeyboardButton("Вернуться назад")
-            markup.add(btn_back)
-            bot.send_message(message.chat.id, text="Домашнее задание успешно добавлено!", reply_markup=markup)
-            helper["type"] = ""
-        else:
-            helper["type"] = type
-            helper["profile"] = profile
-            helper["sub"] = sub
-            helper["cnt"] = cnt
+            sub = mes_text.split()[0]
+            profile = myid
+            cnt = int(mes_text.split()[3])
+            type = "add"
+            hw = ""
+            for x in message.text.split()[5::]:
+                hw = hw + x + " "
+            if not (helper["day"] in homework.keys()):
+                homework[helper["day"]] = {myid: {"texts": {}, "im": {}}}
+            else:
+                if len(homework[helper["day"]][profile]["texts"]) != 0 and sub in homework[helper["day"]][profile]["texts"].keys():
+                    del homework[helper["day"]][profile]["texts"][sub]
+                if len(homework[helper["day"]][profile]["im"]) != 0 and sub in homework[helper["day"]][profile]["im"].keys():
+                    for x in homework[helper["day"]][profile]["im"][sub]:
+                        os.remove("./photos/" + x)
+                    del homework[helper["day"]][profile]["im"][sub]
+            homework[helper["day"]][profile]["texts"][sub] = hw
+            if cnt == 0:
+                user_state[str(message.chat.id)] = 'redakt hw'
+                btn_hw_1 = types.KeyboardButton("Добавить дз")
+                btn_hw_3 = types.KeyboardButton("Удалить дз")
+                btn_hw_4 = types.KeyboardButton("Удалить все дз")
+                btn_hw_5 = types.KeyboardButton("Удалить дз на день")
+                markup.add(btn_hw_1, btn_hw_3)
+                markup.add(btn_hw_4, btn_hw_5)
+                btn_back = types.KeyboardButton("Вернуться назад")
+                markup.add(btn_back)
+                bot.send_message(message.chat.id, text="Домашнее задание успешно добавлено!", reply_markup=markup)
+                helper["type"] = ""
+            else:
+                helper["type"] = type
+                helper["profile"] = profile
+                helper["sub"] = sub
+                helper["cnt"] = cnt
 
     # удалить дз
-    elif (user_state[str(message.chat.id)] == 'redakt hw' and mes_text == "удалить дз"):
+    elif user_state[str(message.chat.id)] == 'redakt hw' and mes_text == "удалить дз":
         markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
         btn_back = types.KeyboardButton("Вернуться назад")
         markup.add(btn_back)
         bot.send_message(message.chat.id, text="Напиши дату в формате ДД.ММ.ГГГГ, в которую ты хочешь удалить дз.",
                          reply_markup=markup)
         user_state[str(message.chat.id)] = "del_hw"
+
     # вывод дз для удаления
-    elif (user_state[str(message.chat.id)] == "del_hw"):
+    elif user_state[str(message.chat.id)] == "del_hw":
         markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
         btn_back = types.KeyboardButton("Вернуться назад")
         markup.add(btn_back)
         day = mes_text
-        if (not mydate.is_good_date(mes_text)):
+        if not mydate.is_good_date(mes_text):
             bot.send_message(message.chat.id, text="Ты ввел дату не в том формате. Пожалуйста, повтори попытку.")
         else:
             output_hw.print_homework(bot, message, day)
             helper["day"] = day
             bot.send_message(message.chat.id,
-                             text='Напиши запрос в формате: *предмет* всем *что удалить*\n*предмет* - предмет так, как он записан выше.\n*что удалить* - текст/фото и перечесление номеров фото через пробел, которые надо удалить(или просто "фото" для удаления всех фото/все\n',
+                             text='Напиши запрос в формате: *предмет* *что удалить*\n*предмет* - предмет так, как он записан выше.\n*что удалить* - текст/фото и перечесление номеров фото через пробел, которые надо удалить(или просто "фото" для удаления всех фото), "все", если надо удалить всю домашку на данный предмет\n',
                              reply_markup=markup)
             user_state[str(message.chat.id)] = "read_del_hw"
+
     # считывание дз для удаления
-    elif (user_state[str(message.chat.id)] == "read_del_hw"):
+    elif user_state[str(message.chat.id)] == "read_del_hw":
         markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
         btn_back = types.KeyboardButton("Вернуться назад")
         markup.add(btn_back)
-        sub = mes_text.split()[0]
-        profile = "both"
-        if (mes_text.split()[1][0:2] == "ин"): profile = "inf"
-        if (mes_text.split()[1][0:2] == "ма"): profile = "mat"
-        day = helper["day"]
-        if (mes_text.split()[2] == "все"):
-            if (not sub in homework[day][profile]["texts"].keys()):
-                bot.send_message(message.chat.id, text="Такого предмета нет. Пожалуйста, повтори запрос.",
-                                 reply_markup=markup)
-            else:
-                helper["type"] = ""
-                if (len(homework[day][profile]["texts"]) != 0):
-                    del homework[day][profile]["texts"][sub]
-                if (len(homework[day][profile]["im"]) != 0):
-                    for x in homework[day][profile]["im"][sub]:
-                        os.remove("./photos/" + x)
-                user_state[str(message.chat.id)] = 'redakt hw'
-                markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
-                btn_hw_1 = types.KeyboardButton("Добавить дз")
-                btn_hw_3 = types.KeyboardButton("Удалить дз")
-                btn_hw_4 = types.KeyboardButton("Удалить все дз")
-                btn_hw_5 = types.KeyboardButton("Удалить дз на день")
-                markup.add(btn_hw_1, btn_hw_3)
-                markup.add(btn_hw_4, btn_hw_5)
-                btn_back = types.KeyboardButton("Вернуться назад")
-                markup.add(btn_back)
-                bot.send_message(message.chat.id, text="Домашнее задание успешно удалено!", reply_markup=markup)
-        elif (mes_text.split()[2] == "текст"):
-            if (not sub in homework[day][profile]["texts"].keys()):
-                bot.send_message(message.chat.id, text="Такого предмета нет. Пожалуйста, повтори запрос.",
-                                 reply_markup=markup)
-            else:
-                del homework[day][profile]["texts"][sub]
-                user_state[str(message.chat.id)] = 'redakt hw'
-                markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
-                btn_hw_1 = types.KeyboardButton("Добавить дз")
-                btn_hw_3 = types.KeyboardButton("Удалить дз")
-                btn_hw_4 = types.KeyboardButton("Удалить все дз")
-                btn_hw_5 = types.KeyboardButton("Удалить дз на день")
-                markup.add(btn_hw_1, btn_hw_3)
-                markup.add(btn_hw_4, btn_hw_5)
-                btn_back = types.KeyboardButton("Вернуться назад")
-                markup.add(btn_back)
-                bot.send_message(message.chat.id,
-                                 text="Домашнее задание успешно удалено! Не забудь добавить текстовое домашнее задание!",
-                                 reply_markup=markup)
+        if len(list(mes_text.split())) != 2:
+            bot.send_message(message.chat.id, text="Ты ввел запрос не в том формате. Пожалуйста, повтори попытку.")
         else:
-            if (not sub in homework[day][profile]["im"].keys()):
-                bot.send_message(message.chat.id, text="Такого предмета нет. Пожалуйста, повтори запрос.",
-                                 reply_markup=markup)
-            else:
-                if (mes_text.split()[-1] == "фото"):
-                    for x in homework[day][profile]["im"][sub]:
-                        os.remove("./photos/" + x)
-                    del homework[day][profile]["im"][sub]
+            sub = mes_text.split()[0]
+            profile = myid
+            day = helper["day"]
+            if mes_text.split()[2] == "все":
+                if not(sub in homework[day][profile]["texts"].keys()):
+                    bot.send_message(message.chat.id, text="Такого предмета нет. Пожалуйста, повтори запрос.",
+                                    reply_markup=markup)
                 else:
-                    new_photos = []
-                    for i in range(0, len(homework[day][profile]["im"][sub])):
-                        if (not (str(i + 1) in mes_text)):
-                            new_photos.append(homework[day][profile]["im"][sub][i])
-                    for x in homework[day][profile]["im"][sub]:
-                        if (not x in new_photos):
+                    helper["type"] = ""
+                    if len(homework[day][profile]["texts"]) != 0:
+                        del homework[day][profile]["texts"][sub]
+                    if len(homework[day][profile]["im"]) != 0:
+                        for x in homework[day][profile]["im"][sub]:
                             os.remove("./photos/" + x)
-                    homework[day][profile]["im"][sub] = new_photos
-                user_state[str(message.chat.id)] = 'redakt hw'
-                markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
-                btn_hw_1 = types.KeyboardButton("Добавить дз")
-                btn_hw_3 = types.KeyboardButton("Удалить дз")
-                btn_hw_4 = types.KeyboardButton("Удалить все дз")
-                btn_hw_5 = types.KeyboardButton("Удалить дз на день")
-                markup.add(btn_hw_1, btn_hw_3)
-                markup.add(btn_hw_4, btn_hw_5)
-                btn_back = types.KeyboardButton("Вернуться назад")
-                markup.add(btn_back)
-                bot.send_message(message.chat.id, text="Домашнее задание успешно удалено!", reply_markup=markup)
-        ch = 1 - 1
-        for profile in homework[day]:
-            if (len(homework[day][profile]["texts"]) != 0):
-                ch += 1
-        if (ch == 0):
-            del homework[day]
+                    user_state[str(message.chat.id)] = 'redakt hw'
+                    markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
+                    btn_hw_1 = types.KeyboardButton("Добавить дз")
+                    btn_hw_3 = types.KeyboardButton("Удалить дз")
+                    btn_hw_4 = types.KeyboardButton("Удалить все дз")
+                    btn_hw_5 = types.KeyboardButton("Удалить дз на день")
+                    markup.add(btn_hw_1, btn_hw_3)
+                    markup.add(btn_hw_4, btn_hw_5)
+                    btn_back = types.KeyboardButton("Вернуться назад")
+                    markup.add(btn_back)
+                    bot.send_message(message.chat.id, text="Домашнее задание успешно удалено!", reply_markup=markup)
+            elif mes_text.split()[2] == "текст":
+                if not(sub in homework[day][profile]["texts"].keys()):
+                    bot.send_message(message.chat.id, text="Такого предмета нет. Пожалуйста, повтори запрос.",
+                                     reply_markup=markup)
+                else:
+                    del homework[day][profile]["texts"][sub]
+                    user_state[str(message.chat.id)] = 'redakt hw'
+                    markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
+                    btn_hw_1 = types.KeyboardButton("Добавить дз")
+                    btn_hw_3 = types.KeyboardButton("Удалить дз")
+                    btn_hw_4 = types.KeyboardButton("Удалить все дз")
+                    btn_hw_5 = types.KeyboardButton("Удалить дз на день")
+                    markup.add(btn_hw_1, btn_hw_3)
+                    markup.add(btn_hw_4, btn_hw_5)
+                    btn_back = types.KeyboardButton("Вернуться назад")
+                    markup.add(btn_back)
+                    bot.send_message(message.chat.id,
+                                     text="Домашнее задание успешно удалено! Не забудь добавить текстовое домашнее задание!",
+                                     reply_markup=markup)
+            else:
+                if not(sub in homework[day][profile]["im"].keys()):
+                    bot.send_message(message.chat.id, text="Такого предмета нет. Пожалуйста, повтори запрос.",
+                                     reply_markup=markup)
+                else:
+                    if mes_text.split()[-1] == "фото":
+                        for x in homework[day][profile]["im"][sub]:
+                            os.remove("./photos/" + x)
+                        del homework[day][profile]["im"][sub]
+                    else:
+                        new_photos = []
+                        for i in range(0, len(homework[day][profile]["im"][sub])):
+                            if not (str(i + 1) in mes_text):
+                                new_photos.append(homework[day][profile]["im"][sub][i])
+                        for x in homework[day][profile]["im"][sub]:
+                            if not x in new_photos:
+                                os.remove("./photos/" + x)
+                        homework[day][profile]["im"][sub] = new_photos
+                    user_state[str(message.chat.id)] = 'redakt hw'
+                    markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
+                    btn_hw_1 = types.KeyboardButton("Добавить дз")
+                    btn_hw_3 = types.KeyboardButton("Удалить дз")
+                    btn_hw_4 = types.KeyboardButton("Удалить все дз")
+                    btn_hw_5 = types.KeyboardButton("Удалить дз на день")
+                    markup.add(btn_hw_1, btn_hw_3)
+                    markup.add(btn_hw_4, btn_hw_5)
+                    btn_back = types.KeyboardButton("Вернуться назад")
+                    markup.add(btn_back)
+                    bot.send_message(message.chat.id, text="Домашнее задание успешно удалено!", reply_markup=markup)
+            ch = 0
+            for profile in homework[day]:
+                if len(homework[day][profile]["texts"]) != 0:
+                    ch += 1
+            if ch == 0:
+                del homework[day]
 
     # очистка всего дз
-    elif (user_state[str(message.chat.id)] == 'redakt hw' and mes_text == "удалить все дз"):
+    elif user_state[str(message.chat.id)] == 'redakt hw' and mes_text == "удалить все дз":
         markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
         btn_yes = types.KeyboardButton("Да✅")
         btn_no = types.KeyboardButton("Нет❌")
         markup.add(btn_yes, btn_no)
         bot.send_message(message.chat.id, text="Ты уверен?", reply_markup=markup)
         user_state[str(message.chat.id)] = "del_all_hw"
-    elif (mes_text == "да✅" and user_state[str(message.chat.id)] == "del_all_hw"):
+    elif mes_text == "да✅" and user_state[str(message.chat.id)] == "del_all_hw":
         texts = []
         days = []
+        profile = myid
         for day in homework:
             days.append(day)
-            for profile in homework[day]:
-                if (len(homework[day][profile]["texts"]) != 0):
-                    for subject in homework[day][profile]["texts"]:
-                        texts.append(day + " " + profile + " " + subject + " texts")
-                if (len(homework[day][profile]["im"]) != 0):
-                    for subject in homework[day][profile]["im"]:
-                        texts.append(day + " " + profile + " " + subject + " im")
+            if len(homework[day][profile]["texts"]) != 0:
+                for subject in homework[day][profile]["texts"]:
+                    texts.append(day + " " + profile + " " + subject + " texts")
+            if len(homework[day][profile]["im"]) != 0:
+                for subject in homework[day][profile]["im"]:
+                    texts.append(day + " " + profile + " " + subject + " im")
         for x in texts:
             day = x.split()[0]
             profile = x.split()[1]
             subject = x.split()[2]
             wh = x.split()[3]
-            if (wh == "texts"):
+            if wh == "texts":
                 del homework[day][profile]["texts"][subject]
             else:
-                if (len(homework[day][profile]["im"]) != 0):
-                    if (subject in homework[day][profile]["im"].keys()):
+                if len(homework[day][profile]["im"]) != 0:
+                    if subject in homework[day][profile]["im"].keys():
                         for y in homework[day][profile]["im"][subject]:
                             os.remove("./photos/" + y)
                     del homework[day][profile]["im"][subject]
@@ -449,15 +454,15 @@ def func(message):
 
 
     # очистка одного дня
-    elif (user_state[str(message.chat.id)] == 'redakt hw' and mes_text == "удалить дз на день"):
+    elif user_state[str(message.chat.id)] == 'redakt hw' and mes_text == "удалить дз на день":
         user_state[str(message.chat.id)] = "del_all_day"
         markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
         btn_back = types.KeyboardButton("Вернуться назад")
         markup.add(btn_back)
         bot.send_message(message.chat.id, text="Отправь день в формате ДД.ММ.ГГГГ, дз в который ты хочешь удалить.",
                          reply_markup=markup)
-    elif (user_state[str(message.chat.id)] == "del_all_day"):
-        if (not mydate.is_good_date(mes_text)):
+    elif user_state[str(message.chat.id)] == "del_all_day":
+        if not mydate.is_good_date(mes_text):
             bot.send_message(message.chat.id, text="Ты ввел дату не в том формате. Пожалуйста, повтори попытку.")
         else:
             output_hw.print_homework(bot, message, mes_text)
@@ -474,35 +479,34 @@ def func(message):
             btn_no = types.KeyboardButton("Нет❌")
             markup.add(btn_yes, btn_no)
             bot.send_message(message.chat.id, text="Ты уверен?", reply_markup=markup)
-    elif (mes_text == "да✅" and user_state[str(message.chat.id)] == "del_all_day_is_correct"):
+    elif mes_text == "да✅" and user_state[str(message.chat.id)] == "del_all_day_is_correct":
         markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
         btn_back = types.KeyboardButton("Вернуться назад")
         markup.add(btn_back)
         texts = []
+        profile = myid
         cur_date = helper["day"]
         helper["day"] = ""
-        if (not (cur_date in homework.keys())):
+        if not(cur_date in homework.keys()) or not(profile in homework[cur_date].keys()):
             bot.send_message(message.chat.id, text="На этот день ничего не задали, выбери другой день.",
                              reply_markup=markup)
             user_state[str(message.chat.id)] = "del_all_day"
         else:
-            for profile in homework[cur_date]:
-                if (len(homework[cur_date][profile]["texts"]) != 0):
-                    for subject in homework[cur_date][profile]["texts"]:
-                        texts.append(cur_date + " " + profile + " " + subject + " texts")
-                if (len(homework[cur_date][profile]["im"]) != 0):
-                    for subject in homework[cur_date][profile]["im"]:
-                        texts.append(cur_date + " " + profile + " " + subject + " im")
+            if len(homework[cur_date][profile]["texts"]) != 0:
+                for subject in homework[cur_date][profile]["texts"]:
+                    texts.append(cur_date + " " + profile + " " + subject + " texts")
+            if len(homework[cur_date][profile]["im"]) != 0:
+                for subject in homework[cur_date][profile]["im"]:
+                    texts.append(cur_date + " " + profile + " " + subject + " im")
             for x in texts:
                 day = x.split()[0]
-                profile = x.split()[1]
                 subject = x.split()[2]
                 wh = x.split()[3]
-                if (wh == "texts"):
+                if wh == "texts":
                     del homework[day][profile]["texts"][subject]
                 else:
-                    if (len(homework[day][profile]["im"]) != 0):
-                        if (subject in homework[day][profile]["im"].keys()):
+                    if len(homework[day][profile]["im"]) != 0:
+                        if subject in homework[day][profile]["im"].keys():
                             for y in homework[day][profile]["im"][subject]:
                                 os.remove("./photos/" + y)
                         del homework[day][profile]["im"][subject]
