@@ -9,15 +9,29 @@ from telebot import types
 token = open('file_token.txt').read()
 bot = telebot.TeleBot(token)
 print("Bot is online.")
-
-homework = json.loads(open('./jsons/homeworks.json', 'r', encoding='utf-8').read())
-user_state = json.loads(open('./jsons/users_states.json', 'r', encoding='utf-8').read())
-helper = json.loads(open('./jsons/edithw.json', 'r', encoding='utf-8').read())
+global myid
+myid = ""
 
 @bot.message_handler(commands=['start'])
 def start(message):
     myid = str(message.from_user.id)
-    #print(myid)
+    file_name = "homework" + str(message.from_user.id) + ".json"
+    with open('./jsons/' + file_name, 'w', encoding='utf-8') as f:
+        json.dump({"all": {"texts": {}, "im": {}}}, f)
+    f.close()
+
+    file_name = "user_state" + str(message.from_user.id) + ".json"
+    with open('./jsons/' + file_name, 'w', encoding='utf-8') as f:
+        json.dump({str(message.from_user.id): "not found"}, f)
+    f.close()
+
+    user_state = json.loads(open('./jsons/' + file_name, 'r', encoding='utf-8').read())
+
+    file_name = "helper" + str(message.from_user.id) + ".json"
+    with open('./jsons/' + file_name, 'w', encoding='utf-8') as f:
+        json.dump({"type" : {}, "day": {}, "profile": "all", "sub": {}, "cnt": 0}, f)
+    f.close()
+
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
     btn_start_1 = types.KeyboardButton("Домашнее задание📚")
     btn_start_admin_1 = types.KeyboardButton("✨Редактировать домашнее задание✨")
@@ -27,22 +41,27 @@ def start(message):
     markup.add(btn_start_1, btn_start_admin_1)
     markup.add(btn_start_2, btn_start_3)
     user_state[str(message.chat.id)] = 'main menu'
-    open('./jsons/users_states.json', 'w', encoding='utf-8').write(json.dumps(user_state, ensure_ascii=False))
+    open('./jsons/user_state' + myid + '.json', 'w', encoding='utf-8').write(json.dumps(user_state, ensure_ascii=False))
     bot.send_message(message.chat.id,
                      text="Привет, {0.first_name}! Я твой ассистент и могу ответить на вопросы, связанные со школой. Что тебе подсказать?".format(
                          message.from_user), reply_markup=markup)
 
 
+homework = json.loads(open('./jsons/homework' + myid + ".json", 'r', encoding='utf-8').read())
+user_state = json.loads(open('./jsons/' + "user_state" + myid + ".json", 'r', encoding='utf-8').read())
+helper = json.loads(open('./jsons/' + "helper" + myid + ".json", 'r', encoding='utf-8').read())
+
 @bot.message_handler(content_types=['text', 'photo'])
 def func(message):
-    myid = str(message.from_user.id)
+    print(user_state)
     mes_text = "-1"
+    myid = str(message.from_user.id)
     if message.photo == None:
         mes_text = message.text
         mes_text = mes_text.lower()
 
     # кнопка вернуться назад
-    if mes_text == "вернуться назад" or mes_text == "нет❌" or user_state[str(message.chat.id)] in "not found":
+    if mes_text == "вернуться назад" or mes_text == "нет❌" or user_state[myid] in "not found":
         if user_state[str(message.chat.id)] in ["not found", "homework", "redakt hw"]:
             markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
             btn_start_1 = types.KeyboardButton("Домашнее задание📚")
@@ -139,21 +158,21 @@ def func(message):
 
     # вывод дз
     elif user_state[str(message.chat.id)] == 'homework' and mes_text == "дз на понедельник":
-        output_hw.print_homework(bot, message, mydate.get_day_by_number(1))
+        user_state[str(message.chat.id)] = output_hw.print_homework(bot, message, mydate.get_day_by_number(1))
     elif user_state[str(message.chat.id)] == 'homework' and mes_text == "дз на вторник":
-        output_hw.print_homework(bot, message, mydate.get_day_by_number(2))
+        user_state[str(message.chat.id)] = output_hw.print_homework(bot, message, mydate.get_day_by_number(2))
     elif user_state[str(message.chat.id)] == 'homework' and mes_text == "дз на среду":
-        output_hw.print_homework(bot, message, mydate.get_day_by_number(3))
+        user_state[str(message.chat.id)] = output_hw.print_homework(bot, message, mydate.get_day_by_number(3))
     elif user_state[str(message.chat.id)] == 'homework' and mes_text == "дз на четверг":
-        output_hw.print_homework(bot, message, mydate.get_day_by_number(4))
+        user_state[str(message.chat.id)] = output_hw.print_homework(bot, message, mydate.get_day_by_number(4))
     elif user_state[str(message.chat.id)] == 'homework' and mes_text == "дз на пятницу":
-        output_hw.print_homework(bot, message, mydate.get_day_by_number(5))
+        user_state[str(message.chat.id)] = output_hw.print_homework(bot, message, mydate.get_day_by_number(5))
     elif user_state[str(message.chat.id)] == 'homework' and mes_text == "дз на субботу":
-        output_hw.print_homework(bot, message, mydate.get_day_by_number(6))
+        user_state[str(message.chat.id)] = output_hw.print_homework(bot, message, mydate.get_day_by_number(6))
     elif user_state[str(message.chat.id)] == 'homework' and mes_text == "дз до конца недели":
-        output_hw.print_week(bot, message)
+        user_state[str(message.chat.id)] = output_hw.print_week(bot, message)
     elif user_state[str(message.chat.id)] == 'watch_hw':
-        output_hw.print_homework(bot, message, mes_text)
+        user_state[str(message.chat.id)] = output_hw.print_homework(bot, message, mes_text)
         markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
         btn_back = types.KeyboardButton("Вернуться назад")
         markup.add(btn_back)
@@ -241,7 +260,7 @@ def func(message):
         if not mydate.is_good_date(mes_text):
             bot.send_message(message.chat.id, text="Ты ввел дату не в том формате. Пожалуйста, повтори попытку.")
         else:
-            output_hw.print_homework(bot, message, mes_text)
+            user_state[str(message.chat.id)] = output_hw.print_homework(bot, message, mes_text)
             helper["day"] = mes_text
             user_state[str(message.chat.id)] = "read_add_hw"
             bot.send_message(message.chat.id,
@@ -258,14 +277,14 @@ def func(message):
                              reply_markup=markup)
         else:
             sub = mes_text.split()[0]
-            profile = myid
+            profile = "all"
             cnt = int(mes_text.split()[3])
             type = "add"
             hw = ""
             for x in message.text.split()[5::]:
                 hw = hw + x + " "
             if not (helper["day"] in homework.keys()):
-                homework[helper["day"]] = {myid: {"texts": {}, "im": {}}}
+                homework[helper["day"]] = {"all": {"texts": {}, "im": {}}}
             else:
                 if len(homework[helper["day"]][profile]["texts"]) != 0 and sub in homework[helper["day"]][profile]["texts"].keys():
                     del homework[helper["day"]][profile]["texts"][sub]
@@ -310,7 +329,7 @@ def func(message):
         if not mydate.is_good_date(mes_text):
             bot.send_message(message.chat.id, text="Ты ввел дату не в том формате. Пожалуйста, повтори попытку.")
         else:
-            output_hw.print_homework(bot, message, day)
+            user_state[str(message.chat.id)] = output_hw.print_homework(bot, message, day)
             helper["day"] = day
             bot.send_message(message.chat.id,
                              text='Напиши запрос в формате: *предмет* *что удалить*\n*предмет* - предмет так, как он записан выше.\n*что удалить* - текст/фото и перечесление номеров фото через пробел, которые надо удалить(или просто "фото" для удаления всех фото), "все", если надо удалить всю домашку на данный предмет\n',
@@ -326,7 +345,7 @@ def func(message):
             bot.send_message(message.chat.id, text="Ты ввел запрос не в том формате. Пожалуйста, повтори попытку.")
         else:
             sub = mes_text.split()[0]
-            profile = myid
+            profile = "all"
             day = helper["day"]
             if mes_text.split()[2] == "все":
                 if not(sub in homework[day][profile]["texts"].keys()):
@@ -416,7 +435,7 @@ def func(message):
     elif mes_text == "да✅" and user_state[str(message.chat.id)] == "del_all_hw":
         texts = []
         days = []
-        profile = myid
+        profile = "all"
         for day in homework:
             days.append(day)
             if len(homework[day][profile]["texts"]) != 0:
@@ -427,7 +446,7 @@ def func(message):
                     texts.append(day + " " + profile + " " + subject + " im")
         for x in texts:
             day = x.split()[0]
-            profile = x.split()[1]
+            profile = "all"
             subject = x.split()[2]
             wh = x.split()[3]
             if wh == "texts":
@@ -465,7 +484,7 @@ def func(message):
         if not mydate.is_good_date(mes_text):
             bot.send_message(message.chat.id, text="Ты ввел дату не в том формате. Пожалуйста, повтори попытку.")
         else:
-            output_hw.print_homework(bot, message, mes_text)
+            user_state[str(message.chat.id)] = output_hw.print_homework(bot, message, mes_text)
             if ((not (mes_text in homework.keys())) or (len(homework[mes_text]["both"]["texts"]) == 0 and len(
                     homework[mes_text]["inf"]["texts"]) == 0 and len(homework[mes_text]["mat"]["texts"]) == 0)):
                 markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
@@ -484,7 +503,7 @@ def func(message):
         btn_back = types.KeyboardButton("Вернуться назад")
         markup.add(btn_back)
         texts = []
-        profile = myid
+        profile = "all"
         cur_date = helper["day"]
         helper["day"] = ""
         if not(cur_date in homework.keys()) or not(profile in homework[cur_date].keys()):
@@ -540,9 +559,8 @@ def func(message):
         bot.send_message(message.chat.id, text="Выбери действие, которое ты хочешь сделать.", reply_markup=markup)
 
 
-    open('./jsons/users_states.json', 'w', encoding='utf-8').write(json.dumps(user_state, ensure_ascii=False))
-    open('./jsons/homeworks.json', 'w', encoding='utf-8').write(json.dumps(homework, ensure_ascii=False))
-    open('./jsons/edithw.json', 'w', encoding='utf-8').write(json.dumps(helper, ensure_ascii=False))
-
+    open('./jsons/' + "user_state" + myid + ".json", 'w', encoding='utf-8').write(json.dumps(user_state, ensure_ascii=False))
+    open('./jsons/homework' + myid + ".json", 'w', encoding='utf-8').write(json.dumps(homework, ensure_ascii=False))
+    open('./jsons/' + "helper" + myid + ".json", 'w', encoding='utf-8').write(json.dumps(helper, ensure_ascii=False))
 
 bot.polling(none_stop=True)
