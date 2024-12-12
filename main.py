@@ -17,6 +17,29 @@ homework = json.loads(open('./jsons/homeworks.json', 'r', encoding='utf-8').read
 user_state = json.loads(open('./jsons/users_states.json', 'r', encoding='utf-8').read())
 helper = json.loads(open('./jsons/edithw.json', 'r', encoding='utf-8').read())
 
+#кидает ссылки на полезные сайты
+def more_information(bot, message):
+    markup = types.InlineKeyboardMarkup()
+
+    button1 = types.InlineKeyboardButton("google", url='https://www.google.com/')
+    button2 = types.InlineKeyboardButton("Moodle", url='https://newlms.misis.ru/login/index.php')
+    button3 = types.InlineKeyboardButton("Калькулятор матриц", url='https://matrixcalc.org/ru/')
+    button4 = types.InlineKeyboardButton("Графический калькулятор", url='https://www.geogebra.org/graphing?lang=ru')
+    button5 = types.InlineKeyboardButton("Вольфрам", url='https://www.wolframalpha.com/')
+    button6 = types.InlineKeyboardButton("MathDF", url='https://mathdf.com/ru/')
+    button7 = types.InlineKeyboardButton("ChatGPT", url='https://trychatgpt.ru/')
+
+    markup.add(button1)
+    markup.add(button2)
+    markup.add(button3)
+    markup.add(button4)
+    markup.add(button5)
+    markup.add(button6)
+    markup.add(button7)
+
+    bot.send_message(message.chat.id, "Это может помочь в учебе".format(message.from_user), reply_markup=markup)
+
+
 # отправление рандомного мема
 def send_memes():
     count = 79
@@ -120,9 +143,10 @@ def start(message):
     btn_start_admin_1 = types.KeyboardButton("✨Редактировать домашнее задание✨")
     btn_start_2 = types.KeyboardButton("Музыка")
     btn_start_3 = types.KeyboardButton("Мемы")
+    btn_start_4 = types.KeyboardButton("Полезное")
 
     markup.add(btn_start_1, btn_start_admin_1)
-    markup.add(btn_start_2, btn_start_3)
+    markup.add(btn_start_2, btn_start_3, btn_start_4)
     user_state[str(message.chat.id)] = 'main menu'
     open('./jsons/users_states.json', 'w', encoding='utf-8').write(json.dumps(user_state, ensure_ascii=False))
     bot.send_message(message.chat.id,
@@ -173,9 +197,10 @@ def func(message):
                 btn_start_admin_1 = types.KeyboardButton("✨Редактировать домашнее задание✨")
                 btn_start_2 = types.KeyboardButton("Музыка")
                 btn_start_3 = types.KeyboardButton("Мемы")
+                btn_start_4 = types.KeyboardButton("Полезное")
 
                 markup.add(btn_start_1, btn_start_admin_1)
-                markup.add(btn_start_2, btn_start_3)
+                markup.add(btn_start_2, btn_start_3, btn_start_4)
                 user_state[str(message.chat.id)] = 'main menu'
                 bot.send_message(message.chat.id,
                                  text="<b> <i>Никому ничего не задали😁</i> </b>",parse_mode='HTML',
@@ -189,9 +214,10 @@ def func(message):
                     btn_start_admin_1 = types.KeyboardButton("✨Редактировать домашнее задание✨")
                     btn_start_2 = types.KeyboardButton("Музыка")
                     btn_start_3 = types.KeyboardButton("Мемы")
+                    btn_start_4 = types.KeyboardButton("Полезное")
 
                     markup.add(btn_start_1, btn_start_admin_1)
-                    markup.add(btn_start_2, btn_start_3)
+                    markup.add(btn_start_2, btn_start_3, btn_start_4)
                     user_state[str(message.chat.id)] = 'main menu'
                     print_profile(day, "both")
 
@@ -236,9 +262,10 @@ def func(message):
             btn_start_admin_1 = types.KeyboardButton("✨Редактировать домашнее задание✨")
             btn_start_2= types.KeyboardButton("Музыка")
             btn_start_3= types.KeyboardButton("Мемы")
+            btn_start_4 = types.KeyboardButton("Полезное")
 
             markup.add(btn_start_1, btn_start_admin_1)
-            markup.add(btn_start_2, btn_start_3)
+            markup.add(btn_start_2, btn_start_3, btn_start_4)
             user_state[str(message.chat.id)] = 'main menu'
             bot.send_message(message.chat.id,
                              text="Ты вернулся в главное меню. С чем тебе помочь?".format(message.from_user),
@@ -373,6 +400,9 @@ def func(message):
         markup.add(back)
         bot.send_message(message.chat.id, text="На какой день тебя интересует домашнее задание?", reply_markup=markup)
 
+    # кнопка полезное
+    elif (user_state[str(message.chat.id)] == 'main menu' and mes_text == "полезное"):
+        more_information(bot, message)
 
 
     # кнопка музыка

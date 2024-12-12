@@ -49,9 +49,11 @@ def print_homework(bot, message, day):
             btn_start_admin_1 = types.KeyboardButton("✨Редактировать домашнее задание✨")
             btn_start_2 = types.KeyboardButton("Музыка")
             btn_start_3 = types.KeyboardButton("Мемы")
+            btn_start_4 = types.KeyboardButton("Полезное")
 
             markup.add(btn_start_1, btn_start_admin_1)
-            markup.add(btn_start_2, btn_start_3)
+            markup.add(btn_start_2, btn_start_3, btn_start_4)
+
             user_state[str(message.chat.id)] = 'main menu'
             bot.send_message(message.chat.id,
                              text="<b> <i>Никому ничего не задали😁</i> </b>", parse_mode='HTML',
@@ -66,9 +68,10 @@ def print_homework(bot, message, day):
                 btn_start_admin_1 = types.KeyboardButton("✨Редактировать домашнее задание✨")
                 btn_start_2 = types.KeyboardButton("Музыка")
                 btn_start_3 = types.KeyboardButton("Мемы")
+                btn_start_4 = types.KeyboardButton("Полезное")
 
                 markup.add(btn_start_1, btn_start_admin_1)
-                markup.add(btn_start_2, btn_start_3)
+                markup.add(btn_start_2, btn_start_3, btn_start_4)
                 user_state[str(message.chat.id)] = 'main menu'
                 print_profile(bot, message, day, myid)
     return user_state[str(message.chat.id)]

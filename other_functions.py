@@ -1,7 +1,29 @@
 import telebot, string, random
 from telebot import types
 
+#кидает ссылки на полезные сайты
+def more_information(bot, message):
+    markup = types.InlineKeyboardMarkup()
 
+    button1 = types.InlineKeyboardButton("google", url='https://www.google.com/')
+    button2 = types.InlineKeyboardButton("Moodle", url='https://newlms.misis.ru/login/index.php')
+    button3 = types.InlineKeyboardButton("Калькулятор матриц", url='https://matrixcalc.org/ru/')
+    button4 = types.InlineKeyboardButton("Графический калькулятор", url='https://www.geogebra.org/graphing?lang=ru')
+    button5 = types.InlineKeyboardButton("Вольфрам", url='https://www.wolframalpha.com/')
+    button6 = types.InlineKeyboardButton("MathDF", url='https://mathdf.com/ru/')
+    button7 = types.InlineKeyboardButton("ChatGPT", url='https://trychatgpt.ru/')
+
+    markup.add(button1)
+    markup.add(button2)
+    markup.add(button3)
+    markup.add(button4)
+    markup.add(button5)
+    markup.add(button6)
+    markup.add(button7)
+
+    bot.send_message(message.chat.id, "Это может помочь в учебе".format(message.from_user), reply_markup=markup)
+
+#кидает ссылку на упражнение для глаз и спины
 def exercises(bot, message):
     markup = types.InlineKeyboardMarkup()
 

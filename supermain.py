@@ -37,9 +37,11 @@ def start(message):
     btn_start_admin_1 = types.KeyboardButton("✨Редактировать домашнее задание✨")
     btn_start_2 = types.KeyboardButton("Музыка")
     btn_start_3 = types.KeyboardButton("Мемы")
+    btn_start_4 = types.KeyboardButton("Полезное")
 
     markup.add(btn_start_1, btn_start_admin_1)
-    markup.add(btn_start_2, btn_start_3)
+    markup.add(btn_start_2, btn_start_3, btn_start_4)
+
     user_state[str(message.chat.id)] = 'main menu'
     open('./jsons/user_state' + myid + '.json', 'w', encoding='utf-8').write(json.dumps(user_state, ensure_ascii=False))
     bot.send_message(message.chat.id,
@@ -68,9 +70,11 @@ def func(message):
             btn_start_admin_1 = types.KeyboardButton("✨Редактировать домашнее задание✨")
             btn_start_2 = types.KeyboardButton("Музыка")
             btn_start_3 = types.KeyboardButton("Мемы")
+            btn_start_4 = types.KeyboardButton("Полезное")
 
             markup.add(btn_start_1, btn_start_admin_1)
-            markup.add(btn_start_2, btn_start_3)
+            markup.add(btn_start_2, btn_start_3, btn_start_4)
+
             user_state[str(message.chat.id)] = 'main menu'
             bot.send_message(message.chat.id,
                              text="Ты вернулся в главное меню. С чем тебе помочь?".format(message.from_user),
@@ -203,6 +207,10 @@ def func(message):
         markup.add(btn_schedule_7, btn_schedule_8)
         markup.add(back)
         bot.send_message(message.chat.id, text="На какой день тебя интересует домашнее задание?", reply_markup=markup)
+
+    # кнопка полезное
+    elif (user_state[str(message.chat.id)] == 'main menu' and mes_text == "полезное"):
+        other_functions.more_information(bot, message)
 
     # кнопка музыка
     elif user_state[str(message.chat.id)] == 'main menu' and mes_text == "музыка":
