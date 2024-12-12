@@ -36,7 +36,7 @@ def print_profile(bot, message, day, prof):
 def print_homework(bot, message, day):
     myid = str(message.from_user.id)
     homework = json.loads(open('./jsons/homework' + myid + ".json", 'r', encoding='utf-8').read())
-    user_state = json.loads(open('./jsons/' + "user_state" + myid + ".json", 'r', encoding='utf-8').read())
+    user_state = json.loads(open('./jsons/user_state' + myid + ".json", 'r', encoding='utf-8').read())
 
     if not mydate.is_good_date(day):
         bot.send_message(message.chat.id, text="Введена некорректная дата.", parse_mode='HTML')
@@ -73,7 +73,8 @@ def print_homework(bot, message, day):
                 markup.add(btn_start_1, btn_start_admin_1)
                 markup.add(btn_start_2, btn_start_3, btn_start_4)
                 user_state[str(message.chat.id)] = 'main menu'
-                print_profile(bot, message, day, myid)
+                print_profile(bot, message, day, "all")
+                bot.send_message(message.chat.id, text="это всё дз на этот день🙃", reply_markup=markup)
     return user_state[str(message.chat.id)]
 
 
