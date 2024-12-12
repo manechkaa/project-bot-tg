@@ -571,10 +571,18 @@ def func(message):
         btn_back = types.KeyboardButton("Вернуться назад")
         markup.add(btn_back)
         bot.send_message(message.chat.id, text="Выбери действие, которое ты хочешь сделать.", reply_markup=markup)
-
+    else:
+        handle_text(message)
 
     open('./jsons/' + "user_state" + myid + ".json", 'w', encoding='utf-8').write(json.dumps(user_state, ensure_ascii=False))
     open('./jsons/homework' + myid + ".json", 'w', encoding='utf-8').write(json.dumps(homework, ensure_ascii=False))
     open('./jsons/' + "helper" + myid + ".json", 'w', encoding='utf-8').write(json.dumps(helper, ensure_ascii=False))
+
+
+
+def handle_text(message):
+    if not message.reply_to_message:  # Проверяем, что не является ответом на другое сообщение
+        bot.send_message(message.chat.id, "Пожалуйста, выберите один из предложенных вариантов, используя кнопки.")
+
 
 bot.polling(none_stop=True)
