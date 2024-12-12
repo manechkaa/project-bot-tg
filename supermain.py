@@ -9,18 +9,24 @@ from telebot import types
 token = open('file_token.txt').read()
 bot = telebot.TeleBot(token)
 print("Bot is online.")
-global myid
 myid = ""
+
 
 @bot.message_handler(commands=['start'])
 def start(message):
+    global myid
     myid = str(message.from_user.id)
+
     file_name = "homework" + str(message.from_user.id) + ".json"
-    with open('./jsons/' + file_name, 'w', encoding='utf-8') as f:
-        json.dump({"all": {"texts": {}, "im": {}}}, f)
-    f.close()
+    open('./jsons/' + file_name, 'w', encoding='utf-8')
+    a = open('./jsons/' + 'homework' + myid + ".json", 'r', encoding='utf-8').read()
+    if len(a) == 0:
+        with open('./jsons/' + file_name, 'w', encoding='utf-8') as f:
+            json.dump({}, f)
+        f.close()
 
     file_name = "user_state" + str(message.from_user.id) + ".json"
+    #open('./jsons/' + file_name, 'w', encoding='utf-8')
     with open('./jsons/' + file_name, 'w', encoding='utf-8') as f:
         json.dump({str(message.from_user.id): "not found"}, f)
     f.close()
@@ -29,7 +35,7 @@ def start(message):
 
     file_name = "helper" + str(message.from_user.id) + ".json"
     with open('./jsons/' + file_name, 'w', encoding='utf-8') as f:
-        json.dump({"type" : {}, "day": {}, "profile": "all", "sub": {}, "cnt": 0}, f)
+        json.dump({"type": "", "day": "", "profile": "all", "sub": "", "cnt": 0}, f)
     f.close()
 
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
@@ -48,16 +54,16 @@ def start(message):
                      text="Привет, {0.first_name}! Я твой ассистент и могу ответить на вопросы, связанные со школой. Что тебе подсказать?".format(
                          message.from_user), reply_markup=markup)
 
-
-homework = json.loads(open('./jsons/homework' + myid + ".json", 'r', encoding='utf-8').read())
-user_state = json.loads(open('./jsons/' + "user_state" + myid + ".json", 'r', encoding='utf-8').read())
-helper = json.loads(open('./jsons/' + "helper" + myid + ".json", 'r', encoding='utf-8').read())
-
 @bot.message_handler(content_types=['text', 'photo'])
 def func(message):
+
+    myid = str(message.from_user.id)
+    homework = json.loads(open('./jsons/' + 'homework' + myid + ".json", 'r', encoding='utf-8').read())
+    user_state = json.loads(open('./jsons/' + "user_state" + myid + ".json", 'r', encoding='utf-8').read())
+    helper = json.loads(open('./jsons/' + "helper" + myid + ".json", 'r', encoding='utf-8').read())
+
     print(user_state)
     mes_text = "-1"
-    myid = str(message.from_user.id)
     if message.photo == None:
         mes_text = message.text
         mes_text = mes_text.lower()
@@ -275,21 +281,21 @@ def func(message):
                              text="Напиши запрос в формате: *предмет* с *х* фото и само дз.\n*предмет* - предмет, записанный одним словом в именительном падеже.\nс х фото, где х - кол-во фото дз на этот предмет, 0<=x<=10 (Если фото есть, то отправь его(их) следующим(-и) сообщением. Если есть только фото, то напиши текстом, что все задание на фото.)",
                              reply_markup=markup)
     # считывание дз для добавления
-    elif (user_state[str(message.chat.id)] == "read_add_hw"):
+    elif user_state[str(message.chat.id)] == "read_add_hw":
         markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
-        btn_back = types.KeyboardButton("Вернуться назад")
+        #btn_back = types.KeyboardButton("Вернуться назад")
         check = list(mes_text.split())
-        if len(check) < 4 or check[2] != 'c' or not(check[3] in ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10']) or check[4] != 'фото':
+        if len(check) < 4 or check[1] != 'с' or not(check[2] in ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10']) or check[3] != 'фото':
             bot.send_message(message.chat.id,
                              text="Введен некорректный запрос. Напиши его в формате: *предмет* с *x* фото и само дз.\n*предмет* - предмет, записанный одним словом в именительном падеже.\nс х фото, где х - кол-во фото дз на этот предмет, 0<=x<=10 (Если фото есть, то отправь его(их) следуюущим(-и) сообщением. Если есть только фото, то напиши текстом, что всё задание на фото.)",
                              reply_markup=markup)
         else:
             sub = mes_text.split()[0]
             profile = "all"
-            cnt = int(mes_text.split()[3])
+            cnt = int(mes_text.split()[2])
             type = "add"
             hw = ""
-            for x in message.text.split()[5::]:
+            for x in message.text.split()[4::]:
                 hw = hw + x + " "
             if not (helper["day"] in homework.keys()):
                 homework[helper["day"]] = {"all": {"texts": {}, "im": {}}}
