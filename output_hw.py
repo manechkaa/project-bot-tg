@@ -4,10 +4,10 @@ from telebot import types
 import mydate
 
 # вывод дз
-def print_text(bot, message, day, prof, subject):
+def print_text(bot, message, day, subject):
     myid = str(message.from_user.id)
     homework = json.loads(open('./jsons/homework' + myid + ".json", 'r', encoding='utf-8').read())
-    hw = homework[day][prof]["texts"][subject]
+    hw = homework[day]["texts"][subject]
     bot.send_message(message.chat.id,
                      text="<b> <u>" + (json.dumps(subject, ensure_ascii=False).format(message.from_user)).strip(
                          '"') + "</u></b>" + ": " + (
@@ -15,22 +15,22 @@ def print_text(bot, message, day, prof, subject):
                      parse_mode='HTML')
 
 
-def print_photo(bot, message, day, prof, subject):
+def print_photo(bot, message, day, subject):
     myid = str(message.from_user.id)
     homework = json.loads(open('./jsons/homework' + myid + ".json", 'r', encoding='utf-8').read())
-    if subject in homework[day][prof]["im"].keys():
+    if subject in homework[day]["im"].keys():
         cnt = 1
-        for photo in homework[day][prof]["im"][subject]:
+        for photo in homework[day]["im"][subject]:
             bot.send_photo(message.chat.id, photo=open("./photos/" + photo, 'rb').read())
             cnt += 1
 
 
-def print_profile(bot, message, day, prof):
+def print_profile(bot, message, day):
     myid = str(message.from_user.id)
     homework = json.loads(open('./jsons/homework' + myid + ".json", 'r', encoding='utf-8').read())
-    for subject in homework[day][prof]["texts"]:
-        print_text(bot, message, day, prof, subject)
-        print_photo(bot, message, day, prof, subject)
+    for subject in homework[day]["texts"]:
+        print_text(bot, message, day, subject)
+        print_photo(bot, message, day, subject)
 
 
 def print_homework(bot, message, day):
@@ -42,8 +42,8 @@ def print_homework(bot, message, day):
         bot.send_message(message.chat.id, text="Введена некорректная дата.", parse_mode='HTML')
     else:
         if not (day in homework.keys()):
-            homework[day] = {"all": {"texts": {}, "im": {}}}
-        if len(homework[day]["all"]["texts"]) == 0:
+            homework[day] = {"texts": {}, "im": {}}
+        if len(homework[day]["texts"]) == 0:
             markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
             btn_start_1 = types.KeyboardButton("Домашнее задание📚")
             btn_start_admin_1 = types.KeyboardButton("✨Редактировать домашнее задание✨")
@@ -62,7 +62,7 @@ def print_homework(bot, message, day):
             if day in homework.keys():
                 del homework[day]
         else:
-            if len(homework[day]["all"]["texts"]) != 0:
+            if len(homework[day]["texts"]) != 0:
                 markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
                 btn_start_1 = types.KeyboardButton("Домашнее задание📚")
                 btn_start_admin_1 = types.KeyboardButton("✨Редактировать домашнее задание✨")
@@ -73,14 +73,14 @@ def print_homework(bot, message, day):
                 markup.add(btn_start_1, btn_start_admin_1)
                 markup.add(btn_start_2, btn_start_3, btn_start_4)
                 user_state[str(message.chat.id)] = 'main menu'
-                print_profile(bot, message, day, "all")
+                print_profile(bot, message, day)
                 bot.send_message(message.chat.id, text="это всё дз на этот день🙃", reply_markup=markup)
     return user_state[str(message.chat.id)]
 
 
 def print_week(bot, message):
     myid = str(message.from_user.id)
-    user_state = json.loads(open('./jsons/' + "user_state" + myid + ".json", 'r', encoding='utf-8').read())
+    #user_state = json.loads(open('./jsons/' + "user_state" + myid + ".json", 'r', encoding='utf-8').read())
     number = datetime.datetime.today().weekday()
     for i in range(number % 6, 6):
         if i == 0:
