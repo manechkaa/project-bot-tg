@@ -18,7 +18,7 @@ def start(message):
     myid = str(message.from_user.id)
 
     file_name = "homework" + str(message.from_user.id) + ".json"
-    #open('./jsons/' + file_name, 'w', encoding='utf-8')
+    open('./jsons/' + file_name, 'a', encoding='utf-8')
     a = open('./jsons/' + 'homework' + myid + ".json", 'r', encoding='utf-8').read()
     if len(a) == 0:
         with open('./jsons/' + file_name, 'w', encoding='utf-8') as f:

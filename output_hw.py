@@ -101,4 +101,4 @@ def print_week(bot, message):
         if i == 5:
             bot.send_message(message.chat.id, text="<b> ДЗ НА СУББОТУ: </b>",
                                       parse_mode='HTML'), print_homework(bot, message, mydate.get_day_by_number(i + 1))
-    return user_state[str(message.chat.id)]
+    return "main menu"
