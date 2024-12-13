@@ -4,7 +4,7 @@ from telebot import types
 import mydate
 
 # вывод дз
-def print_text(bot, message, day, subject) -> str:
+def print_text(bot, message, day, subject):
     myid = str(message.from_user.id)
     homework = json.loads(open('./jsons/homework' + myid + ".json", 'r', encoding='utf-8').read())
     hw = homework[day]["texts"][subject]
@@ -15,7 +15,7 @@ def print_text(bot, message, day, subject) -> str:
                      parse_mode='HTML')
 
 
-def print_photo(bot, message, day, subject) -> str:
+def print_photo(bot, message, day, subject):
     myid = str(message.from_user.id)
     homework = json.loads(open('./jsons/homework' + myid + ".json", 'r', encoding='utf-8').read())
     if subject in homework[day]["im"].keys():
@@ -25,7 +25,7 @@ def print_photo(bot, message, day, subject) -> str:
             cnt += 1
 
 
-def print_profile(bot, message, day) -> str:
+def print_profile(bot, message, day):
     myid = str(message.from_user.id)
     homework = json.loads(open('./jsons/homework' + myid + ".json", 'r', encoding='utf-8').read())
     for subject in homework[day]["texts"]:
@@ -79,7 +79,7 @@ def print_homework(bot, message, day) -> str:
 
 
 def print_week(bot, message) -> str:
-    myid = str(message.from_user.id)
+    #myid = str(message.from_user.id)
     #user_state = json.loads(open('./jsons/' + "user_state" + myid + ".json", 'r', encoding='utf-8').read())
     number = datetime.datetime.today().weekday()
     for i in range(number % 6, 6):

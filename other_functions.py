@@ -2,7 +2,7 @@ import telebot, string, random
 from telebot import types
 
 #кидает ссылки на полезные сайты
-def more_information(bot, message) -> str:
+def more_information(bot, message):
     markup = types.InlineKeyboardMarkup()
 
     button1 = types.InlineKeyboardButton("google", url='https://www.google.com/')
@@ -24,7 +24,7 @@ def more_information(bot, message) -> str:
     bot.send_message(message.chat.id, "Это может помочь в учебе".format(message.from_user), reply_markup=markup)
 
 #кидает ссылку на упражнение для глаз и спины
-def exercises(bot, message) -> str:
+def exercises(bot, message):
     markup = types.InlineKeyboardMarkup()
 
     button1 = types.InlineKeyboardButton("Разминка для глаз", url='https://www.youtube.com/watch?v=mqXR8O2VJLo')
@@ -36,7 +36,7 @@ def exercises(bot, message) -> str:
     bot.send_message(message.chat.id, "Это будет полезно!".format(message.from_user), reply_markup=markup)
 
 # отправление рандомного мема
-def send_memes(bot, message) -> str:
+def send_memes(bot, message):
     count = 79
     rnd = random.randint(1, 10)
     if rnd == 1:
@@ -46,7 +46,7 @@ def send_memes(bot, message) -> str:
     return photo
 
 #отправление песни для учебы
-def send_playlist(bot, message) -> str:
+def send_playlist(bot, message):
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
     count = 11
     rnd = random.randint(1, count - 4)
