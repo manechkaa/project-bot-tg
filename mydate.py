@@ -1,7 +1,7 @@
 import datetime
 
 # получение даты по номеру дня
-def get_day_by_number(number) -> str:  # 0 - вс
+def get_day_by_number(number) -> int:  # 0 - вс
     current_time = datetime.datetime.today()
     weekday = current_time.weekday()
     if weekday == 6:
@@ -59,7 +59,7 @@ def is_good_date(date: datetime) -> bool:
 
 # получение номера по дате
 def get_number_by_date(cur_date: datetime):  # 0 - пн
-    date = str(cur_date)
+    date = datetime(cur_date)
     year = int(date[6:10])
     month = int(date[3:5])
     day = int(date[0:2])
